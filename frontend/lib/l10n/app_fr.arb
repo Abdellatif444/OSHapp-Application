@@ -1,0 +1,9 @@
+{
+  "@@locale": "fr",
+  "appTitle": "OSHApp",
+  "login": "Connexion",
+  "email": "Email",
+  "password": "Mot de passe",
+  "forgotPassword": "Mot de passe oublié ?",
+  "theme": "Thème"
+}

@@ -1,0 +1,75 @@
+# Configuration spécifique pour Docker
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET}
+    expirationMs: ${APP_JWT_EXPIRATIONMS:86400000}
+
+  frontend:
+    base-url: "${APP_FRONTEND_BASE_URL:oshapp://open}"
+  google:
+    clientId: "${GOOGLE_SERVER_CLIENT_ID:594893980386-d3v5jpjam3i7th1qkn9j5sdds4lo49pn.apps.googleusercontent.com}"
+  mail:
+    redirect:
+      enabled: ${APP_MAIL_REDIRECT_ENABLED:false}
+spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.oauth2.resource.server.servlet.OAuth2ResourceServerAutoConfiguration
+  datasource:
+    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/oshapp}"
+    username: "${SPRING_DATASOURCE_USERNAME:postgres}"
+    password: "${SPRING_DATASOURCE_PASSWORD:postgres}"
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+
+
+  # Configuration email 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "${SPRING_MAIL_USERNAME}"
+    password: "${SPRING_MAIL_PASSWORD}"
+
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          protocol: smtp
+
+
+# # Configuration de l'application
+# app:
+#   notification:
+#     email:
+#       enabled: true  # les emails en Docker
+
+# Configuration Keycloak
+keycloak:
+  realm: oshapp
+  auth-server-url: "${KEYCLOAK_AUTH_SERVER_URL:http://keycloak:8080}"
+  client-id: oshapp-backend
+  credentials:
+    secret: "${KEYCLOAK_CLIENT_SECRET}"
+
+# Configuration du serveur
+server:
+  port: 8081
+  ssl:
+    enabled: false
+
+# Configuration des logs
+logging:
+  level:
+    com.oshapp.backend: INFO
+    org.springframework.security: DEBUG
+    org.keycloak: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"

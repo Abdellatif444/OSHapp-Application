@@ -1,0 +1,70 @@
+# # ============================================================
+# # Configuration commune (tous profils)
+# # ============================================================
+# spring:
+#   application:
+#     name: oshapp-backend
+#   profiles:
+#     active: local
+
+# app:
+#   jwtSecret: OGFhZDE2ZTE4YjA2ZTE3MWRmZTQ4Y2QxZGRiMzY4YmM0NzE1ODg1N2Y4ZGI3Y2YyM2E0YjU0YjQ5YjM3YmE4Yw==
+#   jwtExpirationInMs: 86400000
+
+# ============================================================
+# Profil LOCAL
+# ============================================================
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+    import: optional:file:.env[.properties]
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/oshapp}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  mail:
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME}
+    password: ${SPRING_MAIL_PASSWORD}
+    properties:
+      mail.smtp:
+        auth: true
+        starttls.enable: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:http://localhost:8080/realms/oshapp}
+
+server:
+  address: 0.0.0.0
+  port: 8082
+
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET:VGhpc0lzVGhlTmV3T3NoYXBwU2VjcmV0S2V5Rm9ySldUVG9rZW5lcmF0aW9uV2l0aE1pbmltdW01MTJCaXRzU2VjdXJpdHk=}
+    expirationMs: ${APP_JWT_EXPIRATIONMS:86400000}
+  google:
+    clientId: ${GOOGLE_CLIENT_ID:}
+  mail:
+    redirect:
+      enabled: false
+
+keycloak:
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL:http://192.168.1.111:8080}
+  realm: ${KEYCLOAK_REALM:oshapp}
+  client-id: ${KEYCLOAK_CLIENT_ID:oshapp-backend}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET}
+

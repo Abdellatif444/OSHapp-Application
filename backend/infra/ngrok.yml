@@ -1,0 +1,10 @@
+version: "2"
+# ngrok config file for Docker container
+# The authtoken is read from the NGROK_AUTHTOKEN environment variable set in docker-compose
+# Web UI will be available on http://localhost:4040
+
+tunnels:
+  backend:
+    proto: http
+    addr: backend:8081
+    inspect: false

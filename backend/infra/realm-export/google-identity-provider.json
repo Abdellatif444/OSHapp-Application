@@ -1,0 +1,20 @@
+{
+    "alias": "google",
+    "providerId": "google",
+    "enabled": true,
+    "updateProfileFirstLoginMode": "on",
+    "trustEmail": true,
+    "storeToken": false,
+    "addReadTokenRoleOnCreate": false,
+    "authenticateByDefault": false,
+    "linkOnly": false,
+    "firstBrokerLoginFlowAlias": "first broker login",
+    "config": {
+      "clientId": "594893980386-d3v5jpjam3i7th1qkn9j5sdds4lo49pn.apps.googleusercontent.com",
+      "clientSecret": "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",
+      "defaultScope": "openid email profile",
+      "useJwksUrl": "true"
+    }
+}
+
+

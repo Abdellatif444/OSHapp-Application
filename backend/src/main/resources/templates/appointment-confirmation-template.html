@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title th:text="${subject != null ? subject : 'Confirmation de votre rendez-vous'}">Confirmation de votre rendez-vous</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #2d3748; margin: 0; padding: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .container { max-width: 680px; margin: 20px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; padding: 24px; text-align: center; }
+    .logo { height: 50px; margin-bottom: 12px; }
+    .header h1 { margin: 0; font-size: 24px; font-weight: 700; }
+    .content { padding: 32px; line-height: 1.7; }
+    .greeting { font-size: 16px; color: #4a5568; margin-bottom: 20px; }
+    .main-message { font-size: 18px; font-weight: 600; color: #2d3748; margin-bottom: 24px; }
+    .details-card { background: #f7fafc; border-left: 4px solid #667eea; padding: 20px; margin: 20px 0; border-radius: 8px; }
+    .section { margin: 16px 0; }
+    .label { font-weight: 600; color: #4a5568; display: inline-block; width: 130px; }
+    .value { color: #2d3748; font-weight: 500; }
+    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+    .cta { text-align: center; margin: 32px 0; }
+    .btn { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff !important; text-decoration: none; padding: 12px 24px; border-radius: 25px; font-weight: 600; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); transition: transform 0.2s; }
+    .btn:hover { transform: translateY(-2px); }
+    .footer { padding: 20px; background: #f7fafc; color: #718096; font-size: 12px; text-align: center; border-top: 1px solid #e2e8f0; }
+    .divider { height: 1px; background: linear-gradient(90deg, transparent, #e2e8f0, transparent); margin: 24px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="cid:logo" alt="OHSE Capital" class="logo" />
+      <h1>Confirmation de votre rendez-vous</h1>
+    </div>
+    <div class="content">
+      <div class="greeting">Bonjour <span th:text="${recipientName}">Collaborateur</span>,</div>
+      
+      <!-- Conditional message based on visit type (employee-initiated vs medical service-initiated) -->
+      <div class="main-message" th:switch="${appointment.type}">
+        <span th:case="${T(com.oshapp.backend.model.enums.AppointmentType).SPONTANEOUS}">
+          Votre demande de rendez-vous médical a été confirmée par le service médical.
+        </span>
+        <span th:case="*">
+          La visite médicale planifiée a été confirmée par le service médical.
+        </span>
+      </div>
+
+      <div class="details-card">
+        <div class="section">
+          <span class="label">Statut :</span>
+          <span class="status-badge">Confirmé</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+          <span class="label">Date :</span>
+          <span class="value" th:if="${appointment.scheduledTime != null}" th:text="${#temporals.format(appointment.scheduledTime, 'dd/MM/yyyy à HH:mm')}">29/08/2025 à 10:00</span>
+          <span class="value" th:if="${appointment.scheduledTime == null and appointment.proposedDate != null}" th:text="${#temporals.format(appointment.proposedDate, 'dd/MM/yyyy à HH:mm')}">29/08/2025 à 10:00</span>
+        </div>
+
+        <div class="section" th:if="${(isRh == null or !isRh) and appointment.motif != null and appointment.motif != ''}">
+          <span class="label">Motif :</span>
+          <span class="value" th:text="${appointment.motif}">Visite de reprise</span>
+        </div>
+
+        <div class="section" th:if="${(isRh == null or !isRh) and appointment.notes != null and appointment.notes != ''}">
+          <span class="label" th:text="${appointment != null and (appointment.obligatory or appointment.type == T(com.oshapp.backend.model.enums.AppointmentType).PRE_RECRUITMENT) ? 'Détails supplémentaires :' : 'Notes :'}">Notes :</span>
+          <span class="value" th:text="${appointment.notes}">Notes</span>
+        </div>
+
+        <div class="section">
+          <span class="label">Mode :</span>
+          <span class="value" th:text="${appointment.visitMode == T(com.oshapp.backend.model.enums.VisitMode).REMOTE ? 'À distance' : 'Présentiel'}">Présentiel</span>
+        </div>
+      </div>
+
+      <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 12px; margin: 16px 0; color: #856404;" th:if="${isRh}">
+        <strong>📋 Information RH :</strong><br/>
+        Les détails médicaux (motif, notes) sont masqués par confidentialité.
+      </div>
+
+      <div class="cta" th:if="${actionUrl != null}">
+        <a class="btn" th:href="${actionUrl}" th:text="${actionLabel != null and actionLabel != '' ? actionLabel : 'Voir le rendez-vous'}">Voir le rendez-vous</a>
+      </div>
+
+      <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 16px; margin: 24px 0; color: #856404;">
+        <strong>📧 Information importante :</strong><br/>
+        Cet email est généré automatiquement. Merci de ne pas y répondre. Pour toute action ou modification, veuillez utiliser l'application OSHapp.
+      </div>
+    </div>
+    <div class="footer">
+      <strong>OSHapp — Service de Santé au Travail</strong><br/>
+      OHSE Capital • Protection et bien-être au travail
+    </div>
+  </div>
+</body>
+</html>

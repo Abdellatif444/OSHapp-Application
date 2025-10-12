@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${subject != null ? subject : 'Annulation de visite médicale'}">Annulation de visite médicale</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #dc3545; color: white; padding: 15px; text-align: center; }
+        .content { padding: 20px; background-color: #f9f9f9; }
+        .footer { padding: 10px; text-align: center; color: #666; }
+        .button { background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Annulation de visite médicale</h2>
+        </div>
+        <div class="content">
+            <!-- Conditional message based on visit type (employee-initiated vs medical service-initiated) -->
+            <p th:switch="${appointment.type}">
+                <span th:case="${T(com.oshapp.backend.model.enums.AppointmentType).SPONTANEOUS}">
+                    L'employé <span th:text="${appointment.employee.firstName + ' ' + appointment.employee.lastName}">Nom Prénom</span> –
+                    <span th:text="${appointment.employee.user.email}">email@example.com</span> a annulé sa demande de visite médicale.
+                </span>
+                <span th:case="*">
+                    L'employé <span th:text="${appointment.employee.firstName + ' ' + appointment.employee.lastName}">Nom Prénom</span> –
+                    <span th:text="${appointment.employee.user.email}">email@example.com</span> a annulé la visite médicale que vous aviez proposée.
+                </span>
+            </p>
+
+            <p><strong>Type de visite :</strong>
+                <span th:switch="${appointment.type}">
+                    <span th:case="${T(com.oshapp.backend.model.enums.AppointmentType).PERIODIC}">Périodique</span>
+                    <span th:case="${T(com.oshapp.backend.model.enums.AppointmentType).SURVEILLANCE_PARTICULIERE}">Surveillance particulière</span>
+                    <span th:case="${T(com.oshapp.backend.model.enums.AppointmentType).MEDICAL_CALL}">À l'appel du médecin</span>
+                    <span th:case="${T(com.oshapp.backend.model.enums.AppointmentType).PRE_RECRUITMENT}">Pré-recrutement</span>
+                    <span th:case="${T(com.oshapp.backend.model.enums.AppointmentType).RETURN_TO_WORK}">Reprise de travail</span>
+                    <span th:case="${T(com.oshapp.backend.model.enums.AppointmentType).SPONTANEOUS}">Spontané</span>
+                    <span th:case="${T(com.oshapp.backend.model.enums.AppointmentType).OTHER}">Autre</span>
+                    <span th:case="*">Non spécifié</span>
+                </span>
+            </p>
+            <p><strong>Statut :</strong> Annulé</p>
+            <p><strong>Date :</strong>
+                <span th:text="${appointment.scheduledTime != null ? #temporals.format(appointment.scheduledTime, 'dd/MM/yyyy HH:mm') : (appointment.proposedDate != null ? #temporals.format(appointment.proposedDate, 'dd/MM/yyyy HH:mm') : '—')}">—</span>
+            </p>
+            <p><strong>Modalité :</strong>
+                <span th:if="${appointment.visitMode != null}"
+                      th:text="${appointment.visitMode == T(com.oshapp.backend.model.enums.VisitMode).REMOTE ? 'À distance' : 'Présentiel'}">Présentiel</span>
+                <span th:if="${appointment.visitMode == null}">Non spécifié</span>
+            </p>
+            <div th:if="${appointment.medicalInstructions != null and #strings.isNotEmpty(appointment.medicalInstructions)}">
+                <p><strong>Consignes ou remarques :</strong> <span th:text="${appointment.medicalInstructions}">—</span></p>
+            </div>
+            <div th:if="${appointment.cancellationReason != null and #strings.isNotEmpty(appointment.cancellationReason)}">
+                <p><strong>Motif d'annulation :</strong> <span th:text="${appointment.cancellationReason}">—</span></p>
+            </div>
+
+            <div th:if="${actionUrl != null}">
+                <p><a th:href="${actionUrl}" class="button" th:text="${actionLabel != null and actionLabel != '' ? actionLabel : 'Voir les détails'}">Voir les détails</a></p>
+            </div>
+        </div>
+        <div class="footer">
+            <p>Service Médical - OSHApp</p>
+        </div>
+    </div>
+</body>
+</html>

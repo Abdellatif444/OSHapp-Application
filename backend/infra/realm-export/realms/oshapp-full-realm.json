@@ -1,0 +1,74 @@
+{
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@oshapp.com",
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "User",
+      "credentials": [{ "type": "password", "value": "admin12345678", "temporary": false }],
+      "realmRoles": ["ROLE_ADMIN"]
+    },  
+    {
+      "username": "hse",
+      "enabled": true,
+      "email": "hse@oshapp.com",
+      "emailVerified": true,
+      "firstName": "HSE",
+      "lastName": "User",
+      "credentials": [{ "type": "password", "value": "hse12345678", "temporary": false }],
+      "realmRoles": ["ROLE_HSE"]
+    },
+    {
+      "username": "doctor",
+      "enabled": true,
+      "email": "doctor@oshapp.com",
+      "emailVerified": true,
+      "firstName": "Doctor",
+      "lastName": "User",
+      "credentials": [{ "type": "password", "value": "doctor123", "temporary": false }],
+      "realmRoles": ["ROLE_DOCTOR"]
+    },
+    {
+      "username": "nurse1",
+      "enabled": true,
+      "email": "nurse@oshapp.com",
+      "emailVerified": true,
+      "firstName": "Nurse",
+      "lastName": "User",
+      "credentials": [{ "type": "password", "value": "nurse123", "temporary": false }],
+      "realmRoles": ["ROLE_NURSE"]
+    },
+    {
+      "username": "hr@oshapp.com",
+      "enabled": true,
+      "email": "hr@oshapp.com",
+      "emailVerified": true,
+      "firstName": "RH",
+      "lastName": "User",
+      "credentials": [{ "type": "password", "value": "hr12345678", "temporary": false }],
+      "realmRoles": ["ROLE_RH"]
+    },
+    {
+      "username": "salarie@oshapp.com",
+      "enabled": true,
+      "email": "salarie@oshapp.com",
+      "emailVerified": true,
+      "firstName": "Salarie",
+      "lastName": "Test",
+      "credentials": [{ "type": "password", "value": "salarie123", "temporary": false }],
+      "realmRoles": ["ROLE_EMPLOYEE"]
+    },
+    {
+      "username": "abdellatif",
+      "enabled": true,
+      "email": "abdellatif@oshapp.com",
+      "emailVerified": true,
+      "firstName": "Abdellatif",
+      "lastName": "User",
+      "credentials": [{ "type": "password", "value": "abdellatif12345678", "temporary": false }],
+      "realmRoles": ["ROLE_EMPLOYEE"]
+    }
+  ]
+}

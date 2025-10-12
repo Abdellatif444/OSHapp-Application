@@ -1,0 +1,22 @@
+# Ignore platform-specific build artifacts and settings
+/android
+/ios
+/windows
+/linux
+/macos
+
+# Ignore IDE and local configuration files
+.idea/
+.vscode/
+.metadata
+local.properties
+
+# Ignore build outputs
+/build/
+
+# Ignore package manager files
+.dart_tool/
+.packages
+
+# Ignore other misc files
+*.iml

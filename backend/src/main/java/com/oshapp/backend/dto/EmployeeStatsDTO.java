@@ -1,0 +1,14 @@
+package com.oshapp.backend.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class EmployeeStatsDTO {
+    private long appointmentsCount;
+    private long visitsCount;
+    private long documentsCount;
+}

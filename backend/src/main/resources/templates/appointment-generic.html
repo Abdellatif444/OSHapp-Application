@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title th:text="${subject != null ? subject : 'Notification de rendez-vous'}">Notification de rendez-vous</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; color: #1f2937; margin: 0; padding: 0; background-color: #f8fafc; }
+    .container { max-width: 640px; margin: 0 auto; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
+    .header { background: #0ea5e9; color: #ffffff; padding: 16px 24px; font-size: 18px; font-weight: 600; }
+    .content { padding: 24px; line-height: 1.6; }
+    .section { margin: 16px 0; }
+    .label { font-weight: 600; color: #374151; }
+    .value { color: #111827; }
+    .muted { color: #6b7280; font-size: 13px; }
+    .footer { padding: 16px 24px; background: #f3f4f6; color: #6b7280; font-size: 12px; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 12px; background: #e5f2ff; color: #0c4a6e; border: 1px solid #bfdbfe; }
+    .cta { text-align: center; margin: 24px 0; }
+    .btn { display: inline-block; background: #0ea5e9; color: #ffffff !important; text-decoration: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; }
+    .btn:hover { background: #0284c7; }
+    .btn-secondary { display: inline-block; background: #6b7280; color: #ffffff !important; text-decoration: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; margin-left: 8px; }
+    .btn-secondary:hover { background: #4b5563; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header" th:text="${subject != null ? subject : 'Notification de rendez-vous'}">Notification de rendez-vous</div>
+    <div class="content">
+      <p>Bonjour <span th:text="${recipientName}">Collaborateur</span>,</p>
+      <p>
+        Vous recevez cet email concernant votre rendez-vous médical. Retrouvez ci-dessous les informations connues à ce stade.
+      </p>
+
+      <div class="section" th:if="${appointment.status != null}">
+        <span class="label">Statut:</span>
+        <span class="badge" th:switch="${appointment.status}">
+          <span th:case="${T(com.oshapp.backend.model.enums.AppointmentStatus).REQUESTED_EMPLOYEE}">En attente</span>
+          <span th:case="${T(com.oshapp.backend.model.enums.AppointmentStatus).PROPOSED_MEDECIN}">Créneau proposé</span>
+          <span th:case="${T(com.oshapp.backend.model.enums.AppointmentStatus).CONFIRMED}">Confirmé</span>
+          <span th:case="${T(com.oshapp.backend.model.enums.AppointmentStatus).COMPLETED}">Terminé</span>
+          <span th:case="${T(com.oshapp.backend.model.enums.AppointmentStatus).CANCELLED}">Annulé</span>
+          <span th:case="${T(com.oshapp.backend.model.enums.AppointmentStatus).OBLIGATORY}">Obligatoire</span>
+          <span th:case="*" th:text="${appointment.status}">Statut inconnu</span>
+        </span>
+      </div>
+
+      <div class="section" th:if="${appointment.type != null}">
+        <span class="label">Type:</span>
+        <span class="value" th:switch="${appointment.type}">
+          <span th:case="${T(com.oshapp.backend.model.enums.AppointmentType).SPONTANEOUS}">Visite spontanée</span>
+          <span th:case="${T(com.oshapp.backend.model.enums.AppointmentType).PERIODIC}">Visite périodique</span>
+          <span th:case="${T(com.oshapp.backend.model.enums.AppointmentType).PRE_RECRUITMENT}">Visite d'embauche</span>
+          <span th:case="${T(com.oshapp.backend.model.enums.AppointmentType).RETURN_TO_WORK}">Visite de reprise</span>
+          <span th:case="${T(com.oshapp.backend.model.enums.AppointmentType).OTHER}">Autre</span>
+          <span th:case="*" th:text="${appointment.type}">Type inconnu</span>
+        </span>
+      </div>
+
+      <div class="section" th:if="${appointment.visitMode != null}">
+        <span class="label">Mode de visite:</span>
+        <span class="value" th:text="${appointment.visitMode == T(com.oshapp.backend.model.enums.VisitMode).REMOTE ? 'À distance' : 'En présentiel'}"></span>
+      </div>
+
+      <!-- Informations sur l'employé -->
+      <div class="section" th:if="${appointment.employee != null}">
+        <span class="label">Employé concerné:</span>
+        <span class="value">
+          <span th:text="${appointment.employee.firstName + ' ' + appointment.employee.lastName}">Nom Prénom</span>
+          <span th:if="${appointment.employee.user != null and appointment.employee.user.email != null}">
+            (<span th:text="${appointment.employee.user.email}">email@example.com</span>)
+          </span>
+        </span>
+      </div>
+
+      <!-- Indicateur rendez-vous obligatoire -->
+      <div class="section" th:if="${appointment.obligatory}">
+        <span style="display: inline-block; padding: 4px 12px; background-color: #fee2e2; color: #991b1b; border-radius: 4px; font-weight: 600;">
+          ⚠️ RENDEZ-VOUS OBLIGATOIRE
+        </span>
+      </div>
+
+      <div class="section" th:if="${(isRh == null or !isRh) and appointment.motif != null and appointment.motif != ''}">
+        <span class="label">Motif :</span>
+        <span class="value" th:text="${appointment.motif}">Visite de reprise</span>
+      </div>
+
+      <div class="section" th:if="${(isRh == null or !isRh) and appointment.notes != null and appointment.notes != ''}">
+        <span class="label" th:text="${appointment != null and (appointment.obligatory or appointment.type == T(com.oshapp.backend.model.enums.AppointmentType).PRE_RECRUITMENT) ? 'Détails supplémentaires :' : 'Notes :'}">Notes :</span>
+        <span class="value" th:text="${appointment.notes}">Notes additionnelles</span>
+      </div>
+
+      <div class="section" th:if="${appointment.scheduledTime != null}">
+        <span class="label">Date/heure planifiée:</span>
+        <span class="value" th:text="${#temporals.format(appointment.scheduledTime, 'dd/MM/yyyy HH:mm')}">01/01/2025 14:00</span>
+      </div>
+
+      <div class="section" th:if="${appointment.scheduledTime == null and appointment.proposedDate != null and appointment.requestedDateEmployee != null}">
+        <div class="label">Demande initiale:</div>
+        <div class="value" style="margin-left:8px;">
+          <div>Date: <span th:text="${#temporals.format(appointment.requestedDateEmployee, 'dd/MM/yyyy HH:mm')}">29/08/2025 10:00</span></div>
+          <!-- Motif removed for RH confidentiality -->
+        </div>
+        <div class="label" style="margin-top:8px;">Nouvelle proposition:</div>
+        <div class="value" style="margin-left:8px;">
+          <div>Date: <span th:text="${#temporals.format(appointment.proposedDate, 'dd/MM/yyyy HH:mm')}">02/09/2025 14:00</span></div>
+          <div th:if="${appointment.rescheduleReason != null and appointment.rescheduleReason != ''}">Motif de report: <span th:text="${appointment.rescheduleReason}">Motif de report</span></div>
+          <div th:if="${appointment.visitMode != null}">Mode: <span th:text="${appointment.visitMode == T(com.oshapp.backend.model.enums.VisitMode).REMOTE ? 'À distance' : 'En présentiel'}">Mode</span></div>
+        </div>
+      </div>
+
+      <div class="section" th:if="${appointment.scheduledTime == null and appointment.proposedDate != null and appointment.requestedDateEmployee == null}">
+        <span class="label">Créneau proposé:</span>
+        <span class="value" th:text="${#temporals.format(appointment.proposedDate, 'dd/MM/yyyy HH:mm')}">02/01/2025 09:00</span>
+      </div>
+
+      <div class="section" th:if="${appointment.requestedDateEmployee != null}">
+        <span class="label" th:text="${appointment != null and (appointment.obligatory or appointment.type == T(com.oshapp.backend.model.enums.AppointmentType).PRE_RECRUITMENT) ? 'Date limite :' : 'Date souhaitée :'}">Date souhaitée :</span>
+        <span class="value" th:text="${#temporals.format(appointment.requestedDateEmployee, 'dd/MM/yyyy à HH:mm')}">29/08/2025 à 10:00</span>
+      </div>
+
+      <!-- Medical information removed for RH confidentiality in generic template -->
+
+      <div class="info-note" th:if="${isRh}">
+        <strong>📋 Information RH :</strong><br/>
+        Les détails médicaux (motif, notes) sont masqués par confidentialité.
+      </div>
+
+      <div class="cta" th:if="${actionUrl != null}">
+        <a class="btn" th:href="${actionUrl}" th:text="${actionLabel != null ? actionLabel : 'Ouvrir l''application'}">Ouvrir l'application</a>
+        <span th:if="${secondaryActionUrl != null}">
+          <a class="btn-secondary" th:href="${secondaryActionUrl}" th:text="${secondaryActionLabel != null ? secondaryActionLabel : 'Annuler'}">Annuler</a>
+        </span>
+      </div>
+
+      <div class="section" th:if="${actionUrl != null}">
+        <p class="muted">
+          Si le bouton ne fonctionne pas, copiez-collez ce lien dans la barre d'adresse de votre téléphone pour ouvrir l'application:
+          <br/>
+          <span style="word-break: break-all;" th:text="${actionUrl}">oshapp://open/appointment_action</span>
+        </p>
+      </div>
+
+      <p class="muted">
+        Cet email est généré automatiquement. Merci de ne pas y répondre. Pour toute question ou modification, veuillez utiliser l'application OSHapp.
+      </p>
+    </div>
+    <div class="footer">
+      OSHapp &mdash; Service de Santé au Travail
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,153 @@
+services:
+  postgres:
+    image: postgres:16.4
+    container_name: oshapp-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-oshapp}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d oshapp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    env_file:
+      - ../.env
+
+  mongodb:
+    image: mongo:6
+    container_name: oshapp-mongo
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE:-oshapp}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+    env_file:
+      - ../.env
+
+  minio:
+    image: minio/minio:latest
+    container_name: oshapp-minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - miniodata:/data
+    env_file:
+      - ../.env
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.2
+    container_name: oshapp-keycloak
+    environment:
+      KC_DB: ${KC_DB:-postgres}
+      KC_DB_URL: ${KC_DB_URL:-jdbc:postgresql://postgres:5432/oshapp}
+      KC_DB_USERNAME: ${KC_DB_USERNAME:-postgres}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD:-postgres}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+    command: start-dev --import-realm
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keycloak/realms:/opt/keycloak/data/import
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ../.env
+
+  backend:
+    image: maven:3.9-eclipse-temurin-17
+    container_name: oshapp-backend-docker
+    working_dir: /app
+    command: mvn -o -Dmaven.test.skip=true -Djacoco.skip=true -T 1C -Dspring-boot.run.mainClass=com.oshapp.backend.OshappBackendApplication spring-boot:run
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgres:5432/oshapp}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-postgres}
+      SERVER_PORT: ${SERVER_PORT:-8081}
+    ports:
+      - "8081:8081"
+      - "5005:5005"
+    volumes:
+      - ../:/app
+      - ../src/main/resources/backend-keystore.p12:/app/backend-keystore.p12
+      - ../uploads/medical-certificates:/app/uploads/medical-certificates
+      - mavenrepo:/root/.m2
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
+      minio:
+        condition: service_started
+    env_file:
+      - ../.env
+
+  frontend:
+    build:
+      context: ../../frontend
+    container_name: oshapp-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_started
+
+volumes:
+  pgdata:
+  mongodata:
+  miniodata:
+  mavenrepo:
+
+
+
+
+
+
+        # - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
+      # - SPRING_DEVTOOLS_ADD_PROPERTIES=${SPRING_DEVTOOLS_ADD_PROPERTIES:-false}
+      # - SPRING_MAIN_LAZY_INITIALIZATION=${SPRING_MAIN_LAZY_INITIALIZATION:-false}
+      # - SPRING_MVC_SERVLET_LOAD_ON_STARTUP=${SPRING_MVC_SERVLET_LOAD_ON_STARTUP:-1}
+      # - SPRING_THYMELEAF_CHECK_TEMPLATE_LOCATION=${SPRING_THYMELEAF_CHECK_TEMPLATE_LOCATION:-false}
+      # - APP_FRONTEND_BASE_URL=${APP_FRONTEND_BASE_URL:-oshapp://open}
+      # - APP_JWT_SECRET
+      # - APP_JWT_EXPIRATIONMS=${APP_JWT_EXPIRATIONMS:-86400000}
+      # - APP_GOOGLE_CLIENTID
+      # - SERVER_PORT=${SERVER_PORT:-8081}
+      # - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgres:5432/oshapp}
+      # - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME:-postgres}
+      # - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD:-postgres}
+      # - SPRING_DATA_MONGODB_URI=${SPRING_DATA_MONGODB_URI:-mongodb://mongodb:27017/oshapp}
+      # - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
+      # - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin}
+      # - SPRING_MAIL_HOST=${SPRING_MAIL_HOST:-smtp.gmail.com}
+      # - SPRING_MAIL_PORT=${SPRING_MAIL_PORT:-587}
+      # - SPRING_MAIL_USERNAME
+      # - SPRING_MAIL_PASSWORD
+      # - SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH=${SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH:-true}
+      # - SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=${SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE:-true}
+      # - SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_REQUIRED=${SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_REQUIRED:-true}
+      # - SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_TRUST=${SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_TRUST:-smtp.gmail.com}
+      # - SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_PROTOCOLS=${SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_PROTOCOLS:-TLSv1.2}
+      # - SPRING_MAIL_PROPERTIES_MAIL_SMTP_CONNECTIONTIMEOUT=${SPRING_MAIL_PROPERTIES_MAIL_SMTP_CONNECTIONTIMEOUT:-10000}
+      # - SPRING_MAIL_PROPERTIES_MAIL_SMTP_TIMEOUT=${SPRING_MAIL_PROPERTIES_MAIL_SMTP_TIMEOUT:-10000}
+      # - SPRING_MAIL_PROPERTIES_MAIL_SMTP_WRITETIMEOUT=${SPRING_MAIL_PROPERTIES_MAIL_SMTP_WRITETIMEOUT:-10000}
+      # - SPRING_MAIL_PROPERTIES_MAIL_DEBUG=${SPRING_MAIL_PROPERTIES_MAIL_DEBUG:-true}
+      # - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_MAIL=${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_MAIL:-INFO}
+      # - LOGGING_LEVEL_COM_SUN_MAIL=${LOGGING_LEVEL_COM_SUN_MAIL:-INFO}
+      # - KEYCLOAK_AUTH_SERVER_URL=${KEYCLOAK_AUTH_SERVER_URL:-http://keycloak:8080}
+      # - KEYCLOAK_REALM=${KEYCLOAK_REALM:-oshapp}
+      # - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-oshapp-backend}
+      # - KEYCLOAK_CLIENT_SECRET
