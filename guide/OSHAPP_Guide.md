@@ -235,14 +235,7 @@ Veuillez ajouter ci-dessus les **liens séparés** (drive interne, S3, archive r
 - **Tests & couverture**: `jacoco-maven-plugin` configuré. Activer `mvn test` et publier rapports.
 - **Mapping**: `MapStruct` activé (component model Spring).
 
-## 11) Checklist de transfert
-- **[ ]** Lien GitHub final renseigné
-- **[ ]** Vidéo globale ajoutée
-- **[ ]** Rapports de stage ajoutés
-- **[ ]** Liens exports DB (Postgres, Mongo, MinIO) ajoutés
-- **[ ]** Images Docker construites et/ou exportées
-- **[ ]** Variables sensibles fournies via `.env` sécurisé
-- **[ ]** Accès Keycloak fonctionnel et realm importé (`backend/infra/keycloak/realms`)
+
 
 ## 12) Annexes
 - Backend `application-docker.yml`: `backend/src/main/resources/application-docker.yml`
