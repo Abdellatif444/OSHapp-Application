@@ -3,11 +3,7 @@
 Version: 2025-10-11
 
 ## 1) Liens de livraison à compléter
-- **Lien GitHub (version fédérée, code source complet)**: [À RENSEIGNER]
-- **Images Docker (registry ou archives .tar)**: [À RENSEIGNER]
-- **Rapports de stage (PDF)**: [À RENSEIGNER]
-- **Vidéo globale (intégrant la version mobile)**: [À RENSEIGNER]
-- **Liens séparés des bases de données (exports/dumps)**: [À RENSEIGNER]
+- **Lien GitHub (version fédérée, code source complet)**: (https://github.com/Abdellatif444/OSHapp-Application)
 
 ## 2) Architecture et composants
 - **Frontend**: Flutter (Web servi via Nginx)
