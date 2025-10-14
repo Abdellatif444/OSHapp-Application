@@ -90,7 +90,7 @@ docker compose up -d
 
 3. Accès services par défaut:
 - Backend API: `http://localhost:8081`:2c1df7fd7b56e367bb6cd856c36836d5572d69804ba5bc2d6e1abd4bc28c4b82
-- oshapp-mogo: `http://localhost:27017`:325bce247e9a7e69a7a2b422006e432c5022fbaa7e7f257c1f377e32e668af81
+- mogodb: `http://localhost:27017`:325bce247e9a7e69a7a2b422006e432c5022fbaa7e7f257c1f377e32e668af81
 - postgresql:`http://localhost:5432/`:fed9fb91e5b0dac4364119f96445a474f8009d6ff6775fd08fcd43fe5a4c5af9
 - MinIO Console: `http://localhost:9001`:6721c52bdd2028279ba904fcd3f03d84f7fa3fa7c0c17c9e17b9d6f8bbecd801
 
