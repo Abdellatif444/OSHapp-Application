@@ -57,4 +57,6 @@ public interface AppointmentService {
     AppointmentResponseDTO planMedicalVisit(PlanMedicalVisitRequestDTO planRequest);
 
     void deleteAllAppointments();
+
+    void resendNotifications(Long appointmentId, String scenario);
 }

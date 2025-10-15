@@ -197,6 +197,9 @@ public class EmailServiceImpl implements EmailService {
                     continue;
                 }
                 helper.setTo(toEmail);
+                if (mailUsername != null && !mailUsername.isBlank()) {
+                    try { helper.setFrom(mailUsername); } catch (Exception ignored) {}
+                }
                 helper.setSubject(subject);
                 helper.setText(htmlContent, true);
                 
@@ -279,6 +282,9 @@ public class EmailServiceImpl implements EmailService {
                     continue;
                 }
                 helper.setTo(toEmail);
+                if (mailUsername != null && !mailUsername.isBlank()) {
+                    try { helper.setFrom(mailUsername); } catch (Exception ignored) {}
+                }
                 helper.setSubject(subject);
                 helper.setText(htmlContent, true);
                 
@@ -329,6 +335,9 @@ public class EmailServiceImpl implements EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
             helper.setText(text, true);
             helper.setTo(to);
+            if (mailUsername != null && !mailUsername.isBlank()) {
+                try { helper.setFrom(mailUsername); } catch (Exception ignored) {}
+            }
             helper.setSubject(subject);
             mailSender.send(mimeMessage);
             log.info("Email sent to {} with subject: {}", to, subject);

@@ -37,6 +37,7 @@ spring:
     password: "${SPRING_MAIL_PASSWORD}"
 
     properties:
+<<<<<<< HEAD
       mail:
         smtp:
           auth: true
@@ -51,6 +52,17 @@ spring:
           writetimeout: 10000
         transport:
           protocol: smtp
+=======
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+      mail.smtp.from: "${SPRING_MAIL_USERNAME}"
+      mail.smtp.ssl.trust: smtp.gmail.com
+      mail.smtp.connectiontimeout: 10000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
+      mail.transport.protocol: smtp
+>>>>>>> d35fb00 (Correction du blocage SMTP)
 
 
 # # Configuration de l'application

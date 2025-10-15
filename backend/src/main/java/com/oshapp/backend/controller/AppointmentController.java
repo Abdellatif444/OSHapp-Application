@@ -198,4 +198,13 @@ public class AppointmentController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{id}/resend-notifications")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RH', 'NURSE', 'DOCTOR')")
+    public ResponseEntity<Void> resendAppointmentNotifications(
+            @PathVariable Long id,
+            @RequestParam(value = "scenario", required = false) String scenario) {
+        appointmentService.resendNotifications(id, scenario);
+        return ResponseEntity.accepted().build();
+    }
+
 }

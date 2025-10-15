@@ -90,7 +90,7 @@
             </span>
             – Mode : <span th:text="${appointment.visitMode == T(com.oshapp.backend.model.enums.VisitMode).REMOTE ? 'À distance' : 'Présentiel'}">À distance</span>
             <span th:if="${appointment != null and appointment.comments != null and !#lists.isEmpty(appointment.comments)}">
-              – Remarques : <span th:text="${#lists.last(appointment.comments).comment}">—</span>
+              – Remarques : <span th:text="${appointment.comments[appointment.comments.size()-1].comment}">—</span>
             </span>
           </span>
         </div>

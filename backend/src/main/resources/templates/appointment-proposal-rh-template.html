@@ -192,7 +192,7 @@
         </div>
         <div class="section" th:if="${appointment != null and appointment.comments != null and !#lists.isEmpty(appointment.comments)}">
           <span class="label">Remarques :</span>
-          <span class="value" th:text="${#lists.last(appointment.comments).comment}">—</span>
+          <span class="value" th:text="${appointment.comments[appointment.comments.size()-1].comment}">—</span>
         </div>
         <div class="section" th:if="${appointment != null and appointment.visitMode != null}">
           <span class="label">Modalité :</span>

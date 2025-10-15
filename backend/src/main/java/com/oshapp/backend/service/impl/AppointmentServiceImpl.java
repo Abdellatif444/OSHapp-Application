@@ -834,4 +834,41 @@ public class AppointmentServiceImpl implements AppointmentService {
     public void deleteAllAppointments() {
         appointmentRepository.deleteAll();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void resendNotifications(Long appointmentId, String scenario) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with id: " + appointmentId));
+
+        String scen = (scenario != null && !scenario.isBlank()) ? scenario : mapScenarioFromStatus(appointment.getStatus());
+
+        Set<User> recipients = getAllActorsToNotify(appointment);
+        if (recipients != null && !recipients.isEmpty()) {
+            multiChannelNotificationService.notifyUsers(new ArrayList<>(recipients), appointment, scen, null);
+        } else {
+            log.warn("No recipients found to resend notifications for appointment {}", appointmentId);
+        }
+    }
+
+    private String mapScenarioFromStatus(AppointmentStatus status) {
+        if (status == null) return "APPOINTMENT_CONFIRMED";
+        switch (status) {
+            case REQUESTED_EMPLOYEE:
+                return "APPOINTMENT_REQUESTED";
+            case PROPOSED_MEDECIN:
+                return "APPOINTMENT_SLOT_PROPOSED";
+            case PLANNED_BY_MEDICAL_STAFF:
+                return "MEDICAL_VISIT_PLANNED";
+            case CONFIRMED:
+                return "APPOINTMENT_CONFIRMED";
+            case CANCELLED:
+                return "APPOINTMENT_CANCELLED";
+            case OBLIGATORY:
+                return "APPOINTMENT_REQUESTED";
+            case COMPLETED:
+            default:
+                return "APPOINTMENT_CONFIRMED";
+        }
+    }
 }
