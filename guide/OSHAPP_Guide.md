@@ -216,7 +216,6 @@ Frontend (web + Nginx):
 ```bash
 docker build -t oshapp-frontend:latest -f frontend/Dockerfile frontend
 ```
-Optionnel: créez un `docker-compose.prod.yml` pointant vers ces images au lieu du service `backend` basé sur Maven.
 
 ## 8) Export des images Docker (remise off-line)
 ```bash
