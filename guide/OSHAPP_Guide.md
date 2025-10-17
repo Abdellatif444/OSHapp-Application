@@ -222,6 +222,96 @@ Note: seuls les comptes ADMIN sont activés par défaut; les autres nécessitent
 
   - **UserController** (`backend/src/main/java/com/oshapp/backend/controller/UserController.java`)
     - `GET /api/v1/users/me` — Retourne le profil utilisateur courant (`UserResponseDTO`).
+## Paramètres et réponses par endpoint (principaux)
+
+- **Auth** (`/api/v1/auth`)
+  - `POST /login`
+    - Body: `LoginRequest { email, password }`
+    - 200: `LoginResponseDTO { token, user: UserResponseDTO }`
+    - 401: `{ error: "UNAUTHORIZED" }`, 403: `{ error: "ACCOUNT_NOT_ACTIVATED" }`
+  - `POST /google`
+    - Body: `GoogleLoginRequest { idToken }`
+    - 200: `LoginResponseDTO`, 401/500: `{ error: ... }`
+  - `POST /forgot-password`
+    - Body: `ForgotPasswordRequest { email }`
+    - 200: `{ status: "OK" }`
+  - `POST /reset-password`
+    - Body: `ResetPasswordRequest { token, newPassword }`
+    - 200: `{ status: "OK" }` ou 400: `{ error: "INVALID_OR_EXPIRED_TOKEN" }`
+
+- **Account** (`/api/v1/account`)
+  - `POST /activate` — Body: `{ token }` via `ActivationRequest`
+  - `POST /resend-activation` — Body: `{ email }` via `ResendActivationRequest`
+
+- **Appointments** (`/api/v1/appointments`)
+  - `POST /filter` — Body: `AppointmentFilterDTO { statuses|status, type, visitMode, employeeId, dateFrom, dateTo, page, size }` → 200: `Page<AppointmentResponseDTO>`
+  - `POST /Rendez-vous-spontanee` — Body: `AppointmentRequestDTO` → 201: `AppointmentResponseDTO`
+  - `POST /{id}/propose-slot` — Body: `ProposeSlotRequestDTO { proposedDate, comments, visitMode }` → 200: `AppointmentResponseDTO`
+  - `POST /{id}/confirm` — Query: `visitMode?` → 200: `AppointmentResponseDTO`
+  - `PUT /{id}/status` — Query: `status` (enum `AppointmentStatus`) → 200: `AppointmentResponseDTO`
+  - `POST /{id}/cancel` — Body: `CancelRequestDTO { reason }` → 200: `AppointmentResponseDTO`
+  - `POST /{id}/comments` — Body: `AppointmentCommentRequestDTO { comment }` → 200: `AppointmentResponseDTO`
+  - `POST /plan-medical-visit` — Body: `PlanMedicalVisitRequestDTO { employeeId, type, scheduledDateTime, visitMode, medicalInstructions? }` → 201: `AppointmentResponseDTO`
+
+- **Employees** (`/api/v1/employees`)
+  - `PUT /profile` — Body: `EmployeeCreationRequestDTO` → 200: `EmployeeProfileDTO`
+  - `POST|PUT /create-complete` — Body: `EmployeeCreationRequestDTO` → 200: `EmployeeProfileDTO`
+  - `GET /medical-fitness/{employeeId}` → 200: `MedicalFitnessDTO`
+  - `GET /medical-fitness/history/{employeeId}` → 200: `List<MedicalFitnessDTO>`
+
+- **Admin** (`/api/v1/admin`)
+  - `POST /users` — Body: `UserCreationRequestDTO` (email, password, roles) → 200: `UserResponseDTO` | 409: conflit email
+  - `PUT /users/{id}` — Body: `UserUpdateRequestDTO` (email?, roles?, password?, active?) → 200: `UserResponseDTO`
+  - `PUT /employees/{id}/managers` — Body: `EmployeeManagersUpdateDTO { manager1Id?, manager2Id? }` → 200: `Employee`
+  - `PUT /users/{id}/employee-profile` — Body: `EmployeeCreationRequestDTO` → 200: `EmployeeProfileDTO`
+
+- **HR** (`/api/v1/hr`)
+  - `POST /mandatory-visits` — Body: `MandatoryVisitRequestDTO { employeeIds: List<Integer>, visitType: String }` → 200
+  - `POST /medical-certificates/upload` (multipart/form-data)
+    - Fields: `employeeId: Long`, `certificateType?: String`, `issueDate?: ISO_DATE`, `file: MultipartFile`
+    - 200: `MedicalCertificate`
+
+- **Nurse** (`/api/v1/nurse`)
+  - `GET /medical-certificates/uploads?employeeId=Long` → 200: `List<UploadedMedicalCertificateDTO>`
+
+- **Notifications** (`/api/v1/notifications`) → 200: `Page<NotificationResponseDTO>` / `List<NotificationResponseDTO>` / `Long`
+
+## DTOs principaux (champs)
+
+- `LoginRequest` — `email`, `password`
+- `LoginResponseDTO` — `token`, `user: UserResponseDTO`
+- `UserResponseDTO` — `id`, `username`, `email`, `roles: Set<String>`, `employee: EmployeeProfileDTO?`, `active`, `enabled`, `n1?`, `n2?`
+- `EmployeeCreationRequestDTO` — `userId?`, `firstName`, `lastName`, `email?`, `position?`, `department?`, `hireDate?`, `dateOfBirth?`, `manager1Id?`, `manager2Id?`, `cin?`, `cnss?`, `phoneNumber?`, `placeOfBirth?`, `address?`, `nationality?`, `city?`, `zipCode?`, `country?`, `gender?`
+- `EmployeeProfileDTO` — `id`, `firstName`, `lastName`, `email?`, `position?`, `department?`, `phoneNumber?`, `hireDate?`, `profileCompleted`, `gender?`, `address?`, `employeeId?`, `city?`, `zipCode?`, `country?`, `birthDate?`, `birthPlace?`, `nationality?`, `cin?`, `cnss?`, `enabled?`, `roles: Set<String>?`
+- `EmployeeStatsDTO` — `appointmentsCount`, `visitsCount`, `documentsCount`
+- `MedicalFitnessDTO` — `status`, `nextVisitDate`, `doctorName`
+- `AppointmentRequestDTO` — `employeeId?`, `employeeIds?`, `nurseId?`, `doctorId?`, `type: AppointmentType`, `requestedDateEmployee?`, `motif?`, `notes?`, `proposedDateSlots?`, `reason?`, `location?`, `visitMode?`, `isUrgent?`, `preferredTimeSlots?`, `isObligatory?`, `priority?`, `flexibleSchedule?`, `notificationChannels?`, `managerComments?`, `rejectionReason?`, `scheduledTime?`
+- `AppointmentFilterDTO` — `statuses? | status?`, `type?`, `visitMode?`, `employeeId?`, `dateFrom?`, `dateTo?`, `page?`, `size?`
+- `AppointmentResponseDTO` — `id`, `motif?`, `notes?`, `medicalInstructions?`, `medicalServicePhone?`, `visitMode?`, `requestedDateEmployee?`, `employeeId?`, `employee?`, `nurse?`, `doctor?`, `reason?`, `proposedDate?`, `type`, `status`, `requestedDate?`, `scheduledTime?`, `appointmentDate?`, `createdByUsername?`, `comments?`, `location?`, `isObligatory?`, `priority?`, `flexibleSchedule?`, `cancellationReason?`, `rescheduleReason?`, `createdBy?`, `updatedBy?`, `createdAt?`, `updatedAt?`, `notificationChannels?`, `proposedDateSlots?`, `statusDisplay?`, `typeDisplay?`, `typeShortDisplay?`, `visitModeDisplay?`, `statusUiDisplay?`, `statusUiDisplayForNurse?`, `statusUiCategory?`, `canConfirm?`, `canCancel?`, `canPropose?`, `canComment?`
+- `ProposeSlotRequestDTO` — `proposedDate`, `comments?`, `visitMode?`
+- `PlanMedicalVisitRequestDTO` — `employeeId`, `type`, `scheduledDateTime`, `visitMode`, `medicalInstructions?`
+- `AppointmentCommentRequestDTO` — `comment`
+- `CancelRequestDTO` — `reason`
+- `NotificationResponseDTO` — `id`, `title`, `message`, `type`, `read`, `relatedEntityType?`, `relatedEntityId?`, `actionUrl?`, `createdAt`
+- `MandatoryVisitRequestDTO` — `employeeIds: List<Integer>`, `visitType: String`
+- `UploadedMedicalCertificateDTO` — `id`, `employeeId?`, `employeeName?`, `certificateType?`, `issueDate?`, `expirationDate?`, `filePath?`, `doctorName?`, `comments?`
+- `MedicalCertificateDTO` — `id`, `employeeName`, `startDate`, `endDate`, `reason`, `status?`
+
+## Enums (valeurs autorisées)
+
+- `AppointmentStatus` — `REQUESTED_EMPLOYEE`, `PROPOSED_MEDECIN`, `PLANNED_BY_MEDICAL_STAFF`, `CONFIRMED`, `COMPLETED`, `CANCELLED`, `OBLIGATORY`
+- `AppointmentType` — `SPONTANEOUS`, `PERIODIC`, `PRE_RECRUITMENT`, `RETURN_TO_WORK`, `SURVEILLANCE_PARTICULIERE`, `MEDICAL_CALL`, `OTHER`
+- `VisitMode` — `IN_PERSON`, `REMOTE`
+- `Priority` — `LOW`, `MEDIUM`, `HIGH`, `URGENT`
+- `PriorityLevel` — `LOW`, `MEDIUM`, `HIGH`, `URGENT`
+- `RoleName` — `ROLE_EMPLOYEE`, `ROLE_NURSE`, `ROLE_RH`, `ROLE_ADMIN`, `ROLE_DOCTOR`, `ROLE_HSE`
+- `NotificationType` — `APPOINTMENT`, `MESSAGE`, `ALERT`, `DOCUMENT`, `REMINDER`, `VALIDATION`, `INFO`, `ACCIDENT`, `DOSIMETER`, `EXPOSURE`, `REPORT`, `OTHER`
+
+## Erreurs typiques et accès
+
+- Authentification: 401 `UNAUTHORIZED`, 403 `ACCOUNT_NOT_ACTIVATED` (login), 400 `INVALID_REQUEST` (reset/forgot)
+- CORS/Swagger: whitelisted dans `SecurityConfig` (`/swagger-ui/**`, `/v3/api-docs/**`)
+- Accès par rôles: voir annotations `@PreAuthorize` de chaque contrôleur et règles globales dans `SecurityConfig`
 
 
 ## 1) Liens de livraison à compléter
@@ -334,16 +424,6 @@ La commande précédente va créer toutes les images Docker  automatiquement pou
  ```bash
   flutter logs -d IZ9PKVGQUGWKL5FQ
 ```
-## 5) Variables d’environnement (extrait utile)
-Source: `backend/src/main/resources/application-docker.yml` et `backend/infra/docker-compose.yml`
-- App JWT: `APP_JWT_SECRET`, `APP_JWT_EXPIRATIONMS`
-- Frontend deep link/base URL: `APP_FRONTEND_BASE_URL`
-- Google: `GOOGLE_SERVER_CLIENT_ID`
-- Datasource: `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`
-- Email: `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD`
-- Keycloak (app): `KEYCLOAK_AUTH_SERVER_URL`, `KEYCLOAK_CLIENT_SECRET`, `keycloak.realm=oshapp`, `keycloak.client-id=oshapp-backend`
-- Keycloak (serveur): `KEYCLOAK_ADMIN`, `KEYCLOAK_ADMIN_PASSWORD`, `KC_DB`, `KC_DB_URL`, `KC_DB_USERNAME`, `KC_DB_PASSWORD`
-- MinIO: `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD`
 
 ## 6) Dépendances
 ### 6.1 Frontend (pubspec.yaml — runtime)
@@ -462,11 +542,10 @@ docker save oshapp-frontend:latest -o guide/oshapp-frontend-latest.tar
     ```
 
 ## 10) Qualité, sécurité et bonnes pratiques
-- **JWT**: définir `APP_JWT_SECRET` robuste, conserver hors dépôt.
+- **JWT**: définir `APP_JWT_SECRET` robuste.
 - **OIDC**: `keycloak` (realm `oshapp`, client `oshapp-backend`). Mettre à jour `KEYCLOAK_CLIENT_SECRET`.
-- **Mail**: utiliser un compte SMTP dédié (éviter comptes personnels).
-- **Tests & couverture**: `jacoco-maven-plugin` configuré. Activer `mvn test` et publier rapports.
-- **Mapping**: `MapStruct` activé (component model Spring).
+- **Mail**: utiliser un compte SMTP .
+- **Tests & couverture**: `jacoco-maven-plugin` configuré. Activer `mvn test` .
 
 
 
