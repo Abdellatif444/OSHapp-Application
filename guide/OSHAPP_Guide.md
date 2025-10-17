@@ -113,6 +113,117 @@ Création automatique si la base est vide (`DataInitializer`):
 
 Note: seuls les comptes ADMIN sont activés par défaut; les autres nécessitent activation email.
 
+## Détails des méthodes par contrôleur
+
+  - **AuthController** (`backend/src/main/java/com/oshapp/backend/controller/AuthController.java`)
+    - `POST /api/v1/auth/login` — Authentifie via email/mot de passe, vérifie activation, renvoie `LoginResponseDTO` contenant JWT et `UserResponseDTO`.
+    - `POST /api/v1/auth/google` — Vérifie un Google ID Token, crée un utilisateur `ROLE_EMPLOYEE` activé si inexistant, renvoie JWT + profil.
+    - `POST /api/v1/auth/forgot-password` — Demande de réinitialisation sans divulguer l’existence de l’email.
+    - `POST /api/v1/auth/reset-password` — Réinitialisation du mot de passe par token; erreurs gérées (`INVALID_OR_EXPIRED_TOKEN`).
+
+  - **AccountController** (`backend/src/main/java/com/oshapp/backend/controller/AccountController.java`)
+    - `POST /api/v1/account/activate` — Active le compte via token d’activation.
+    - `POST /api/v1/account/resend-activation` — Réevoie un code d’activation à l’email fourni.
+
+  - **AdminController** (`backend/src/main/java/com/oshapp/backend/controller/AdminController.java`) [Accès: `ROLE_ADMIN`/`ROLE_RH` selon méthode]
+    - `POST /api/v1/admin/users` — Crée un utilisateur (email, mot de passe, rôles). Notifie les RH. Conflits email gérés (409).
+    - `GET /api/v1/admin/users` — Liste des utilisateurs.
+    - `GET /api/v1/admin/users/{id}` — Détails d’un utilisateur.
+    - `PUT /api/v1/admin/users/{id}` — Met à jour email, rôles, mot de passe (si fourni), et statut `active`.
+    - `DELETE /api/v1/admin/users/{id}` — Supprime un utilisateur; gère contraintes d’intégrité (409) si lié à des rendez-vous.
+    - `GET /api/v1/admin/dashboard` — Données agrégées du tableau de bord admin.
+    - `GET /api/v1/admin/statistics` — Alias statistiques admin.
+    - `GET /api/v1/admin/roles` — Liste des rôles (admin).
+    - `POST /api/v1/admin/roles` — Crée un rôle (admin).
+    - `PUT /api/v1/admin/roles/{id}` — Met à jour un rôle (admin).
+    - `DELETE /api/v1/admin/roles/{id}` — Supprime un rôle (admin).
+    - `PUT /api/v1/admin/employees/{id}/managers` — Met à jour N+1/N+2 d’un employé.
+    - `PUT /api/v1/admin/users/{id}/employee-profile` — Met à jour le profil employé par `userId`.
+
+  - **EmployeeController** (`backend/src/main/java/com/oshapp/backend/controller/EmployeeController.java`)
+    - `GET /api/v1/employees` — Liste des employés (ADMIN/RH/NURSE/DOCTOR).
+    - `GET /api/v1/employees/for-medical-planning` — Employés pour planification médicale (NURSE/DOCTOR).
+    - `GET /api/v1/employees/subordinates` — Liste des subordonnés du manager courant.
+    - `GET /api/v1/employees/profile` — Redirection vers le profil courant.
+    - `GET /api/v1/employees/profile/me` — Profil utilisateur courant (`UserResponseDTO`).
+    - `GET /api/v1/employees/profile/status` — Indique si le profil est complété.
+    - `PUT /api/v1/employees/profile` — Met à jour le profil employé (`EmployeeCreationRequestDTO`).
+    - `POST|PUT /api/v1/employees/create-complete` — Création complète d’un employé (ADMIN/RH).
+    - `GET /api/v1/employees/stats` — Statistiques personnelles (rdv total, complétés, documents TODO) pour l’employé courant.
+    - `GET /api/v1/employees/medical-fitness/{employeeId}` — Statut d’aptitude calculé depuis la dernière visite complétée.
+    - `GET /api/v1/employees/medical-fitness/history/{employeeId}` — Historique d’aptitude (trié du plus récent).
+
+  - **AppointmentController** (`backend/src/main/java/com/oshapp/backend/controller/AppointmentController.java`)
+    - `GET /api/v1/appointments/employee/{employeeId}` — Rendez-vous d’un employé (self ou staff autorisé).
+    - `GET /api/v1/appointments` — Tous les rendez-vous (ADMIN/RH/NURSE/DOCTOR).
+    - `GET /api/v1/appointments/history` — Historique (complétés/annulés) paginé.
+    - `POST /api/v1/appointments/filter` — Filtrage paginé par type, statuts, mode de visite, employé, période.
+    - `GET /api/v1/appointments/{id}` — Détail d’un rendez-vous.
+    - `POST /api/v1/appointments/Rendez-vous-spontanee` — Création d’un RDV spontané (EMPLOYEE/DOCTOR/NURSE/RH).
+    - `POST /api/v1/appointments/{id}/propose-slot` — Proposition d’un nouveau créneau (NURSE/DOCTOR).
+    - `POST /api/v1/appointments/{id}/confirm` — Confirmation d’un créneau (EMPLOYEE/NURSE/DOCTOR).
+    - `PUT /api/v1/appointments/{id}/status?status=...` — Mise à jour du statut (`REQUESTED`, `PROPOSED`, `CONFIRMED`, `IN_PROGRESS`, `COMPLETED`, etc.).
+    - `POST /api/v1/appointments/{id}/cancel` — Annule un rendez-vous avec motif.
+    - `POST /api/v1/appointments/{id}/comments` — Ajoute un commentaire (contrôle d’accès via `appointmentSecurityService`).
+    - `DELETE /api/v1/appointments/{id}` — Suppression (ADMIN ou règle de sécurité custom).
+    - `GET /api/v1/appointments/my-appointments` — Rendez-vous de l’utilisateur courant (EMPLOYEE/DOCTOR/NURSE), paginé.
+    - `POST /api/v1/appointments/plan-medical-visit` — Planification par le staff médical.
+    - `DELETE /api/v1/appointments/reset-all` — Purge (usage test).
+    - `POST /api/v1/appointments/{id}/resend-notifications` — Relance des notifications.
+
+  - **NotificationController** (`backend/src/main/java/com/oshapp/backend/controller/NotificationController.java`)
+    - `GET /api/v1/notifications` — Notifications de l’utilisateur (paginé).
+    - `GET /api/v1/notifications/unread` — Notifications non lues (liste).
+    - `GET /api/v1/notifications/count` — Nombre de non lues.
+    - `PATCH /api/v1/notifications/{id}/read` — Marque comme lue.
+    - `PATCH /api/v1/notifications/read-all` — Marque tout comme lu.
+    - `DELETE /api/v1/notifications/{id}` — Supprime une notification.
+    - `DELETE /api/v1/notifications/reset-all` — Purge (tests).
+
+  - **HrController** (`backend/src/main/java/com/oshapp/backend/controller/HrController.java`) [Accès: `ROLE_RH`]
+    - `GET /api/v1/hr/medical-certificates` — Liste des certificats médicaux.
+    - `GET /api/v1/hr/medical-certificates/uploads` — Historique des certificats téléversés.
+    - `GET /api/v1/hr/work-accidents` — Déclarations/accidents de travail.
+    - `POST /api/v1/hr/mandatory-visits` — Demande de visites obligatoires (type + liste d’employés).
+    - `POST /api/v1/hr/medical-certificates/upload` (multipart) — Téléversement certificat médical (`employeeId`, type, date, fichier).
+
+  - **NurseCertificatesController** (`backend/src/main/java/com/oshapp/backend/controller/NurseCertificatesController.java`) [Accès: `ROLE_NURSE`]
+    - `GET /api/v1/nurse/medical-certificates/uploads?employeeId=` — Certificats téléversés d’un employé.
+
+  - **DoctorDashboardController** (`backend/src/main/java/com/oshapp/backend/controller/DoctorDashboardController.java`) [Accès: `ROLE_DOCTOR`]
+    - `GET /api/v1/doctor/dashboard` — Données du tableau de bord médecin.
+
+  - **NurseDashboardController** (`backend/src/main/java/com/oshapp/backend/controller/NurseDashboardController.java`) [Accès: `ROLE_NURSE`]
+    - `GET /api/v1/nurse/dashboard` — Données du tableau de bord infirmier.
+
+  - **HseDashboardController** (`backend/src/main/java/com/oshapp/backend/controller/HseDashboardController.java`) [Accès: `ROLE_HSE`]
+    - `GET /api/v1/hse/dashboard` — Données du tableau de bord HSE.
+
+  - **CompanyController** (`backend/src/main/java/com/oshapp/backend/controller/CompanyController.java`)
+    - `GET /api/v1/company-profile` — Récupère le profil entreprise (ADMIN/HR).
+    - `PUT /api/v1/company-profile` — Met à jour le profil entreprise (ADMIN).
+    - `POST /api/v1/company-profile/logo` (multipart) — Téléverse le logo et met à jour le profil (ADMIN).
+
+  - **AuditLogController** (`backend/src/main/java/com/oshapp/backend/controller/AuditLogController.java`) [Accès: `ROLE_ADMIN`]
+    - `GET /api/v1/admin/audit-logs` — Page de logs d’audit.
+
+  - **SettingController** (`backend/src/main/java/com/oshapp/backend/controller/SettingController.java`) [Accès: `ROLE_ADMIN`]
+    - `GET /api/v1/admin/settings` — Map clé/valeur des paramètres.
+    - `PUT /api/v1/admin/settings` — Met à jour les paramètres.
+
+  - **StatisticsController** (`backend/src/main/java/com/oshapp/backend/controller/StatisticsController.java`)
+    - `GET /api/v1/statistics/admin` — Statistiques tableau de bord admin (ADMIN).
+    - `GET /api/v1/statistics/rh` — Statistiques tableau de bord RH (RH).
+    - `GET /api/v1/statistics/rh/alerts` — Alertes RH.
+    - `GET /api/v1/statistics/rh/activities` — Activités RH.
+
+  - **SetupController** (`backend/src/main/java/com/oshapp/backend/controller/SetupController.java`) [Profil `dev` uniquement]
+    - `POST /api/v1/setup/create-test-users` — Crée des utilisateurs de test s’ils n’existent pas.
+
+  - **UserController** (`backend/src/main/java/com/oshapp/backend/controller/UserController.java`)
+    - `GET /api/v1/users/me` — Retourne le profil utilisateur courant (`UserResponseDTO`).
+
+
 ## 1) Liens de livraison à compléter
 - **Lien GitHub (version fédérée, code source complet)**: (https://github.com/Abdellatif444/OSHapp-Application)
 
