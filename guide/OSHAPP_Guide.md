@@ -16,7 +16,7 @@ Version: 2025-10-11
   - Port: `8081` (+ debug `5005`)
   - Profil: `docker`
 - **Infra (Docker Compose)**: `backend/infra/docker-compose.yml`
-  - Services: `postgres:16.4`, `mongo:6`, `minio/minio:latest`, `quay.io/keycloak/keycloak:24.0.2`, `backend`, `frontend`
+  - Services: `postgres:16.4`, `mongo:6`, `minio/minio:latest`, `backend`, `frontend`
   - Volumes: `pgdata`, `mongodata`, `miniodata`, `mavenrepo`
 - **Config principale (Docker)**: `backend/src/main/resources/application-docker.yml`
 - **Docs API**: Swagger UI via SpringDoc
@@ -99,6 +99,14 @@ La commande précédente va créer toutes les images Docker  automatiquement pou
 # Check backend status
 ```bash
   docker compose  logs -f   backend
+```
+ # Reset everything
+
+ ```bash
+  docker compose-f .\infra\docker-compose.yml down-v
+```
+  ```bash
+   docker compose-f .\infra\docker-compose.yml up-d
 ```
 
 ## 4)Lancer l’application Flutter (frontend) sur un téléphone physique plutôt que sur un émulateur :
