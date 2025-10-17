@@ -1,6 +1,117 @@
 # OSHapp — Guide de passation et réutilisation du code
 
-Version: 2025-10-11
+# OSHapp — Guide du Projet (Complet et Vérifié)
+
+## Aperçu
+- **Backend**: Spring Boot 3.5.4 (Java 17), Maven
+- **Sécurité**: JWT stateless (profils `local`/`docker`) et mode Keycloak (profil `keycloak`)
+- **BBDD**: PostgreSQL (JPA/Hibernate, DDL auto `update`)
+- **Stockage**: MinIO via Docker 
+- **Messagerie**: Gmail SMTP (Spring Mail)
+- **Frontend**: Flutter Web (servi par Nginx en Docker)
+- **Infra**: Docker Compose (Postgres, MongoDB, MinIO, Keycloak, Backend, Frontend)
+
+Références vérifiées:
+- `backend/pom.xml` (Spring Boot 3.5.4, Java 17)
+- `backend/src/main/resources/application.yaml` (profil `local`)
+- `backend/src/main/resources/application-docker.yml` (profil `docker`)
+- `backend/infra/docker-compose.yml` (services & ports)
+- `frontend/pubspec.yaml` (Flutter)
+
+## Structure du dépôt
+- `backend/`
+  - API Spring Boot, configs, sécurité, seeds
+  - `infra/docker-compose.yml`
+  - `src/main/resources/application.yaml`, `application-docker.yml`
+- `frontend/`
+  - Application Flutter Web, `Dockerfile`, `nginx.conf`, `pubspec.yaml`
+- `guide/`
+  - Documentation existante (`OSHAPP_Guide.md`, `OSHAPP_Guide.docx`)
+
+## Profils de sécurité et auth
+- **Profil `local`**: authentification interne + JWT via `JwtTokenProvider`.
+- **Profil `docker`**: idem `local`, exclusions OAuth2 RS (voir `application-docker.yml`).
+- **Profil `keycloak`**: OAuth2 Resource Server + `JwtAuthConverter` (mappage des rôles Keycloak).
+
+Endpoints Swagger ouverts: `/swagger-ui.html`, `/swagger-ui/**`, `/v3/api-docs/**`.
+CORS autorisé (par défaut): `http://localhost:3001` et `*` (voir `SecurityConfig`).
+
+## Rôles
+- `ROLE_ADMIN`, `ROLE_RH`, `ROLE_NURSE`, `ROLE_DOCTOR`, `ROLE_EMPLOYEE`, `ROLE_HSE`.
+
+## Entités clés (JPA)
+- `User`, `Role`, `Employee`
+- `Appointment`, `AppointmentComment`
+- `Notification`, `AuditLog`, `Setting`, `WorkflowStep`
+- `ActivationToken`, `PasswordResetToken`
+- `Company`, `WorkAccident`
+- `MedicalCertificate`, `SickLeaveCertificate`
+
+## API — Contrôleurs et Endpoints
+- `AuthController` (`/api/v1/auth`)
+  - `POST /login`
+  - `POST /google`
+  - `POST /forgot-password`
+  - `POST /reset-password`
+- `AccountController` (`/api/v1/account`)
+  - `POST /activate`
+  - `POST /resend-activation`
+- `AdminController` (`/api/v1/admin`)
+  - `POST /users`, `GET /users`, `GET /users/{id}`, `PUT /users/{id}`, `DELETE /users/{id}`
+  - `GET /dashboard`
+  - `GET /statistics`
+  - Rôles: `GET/POST/PUT/DELETE /roles`, managers: `PUT /employees/{id}/managers`
+  - Profil employé par userId: `PUT /users/{id}/employee-profile`
+- `EmployeeController` (`/api/v1/employees`)
+  - `GET /` (liste)
+  - `GET /for-medical-planning`
+  - `GET /subordinates`
+  - `GET /profile`, `GET /profile/me`, `GET /profile/status`, `PUT /profile`
+  - `POST|PUT /create-complete`
+  - `GET /stats`
+  - `GET /medical-fitness/{employeeId}`
+  - `GET /medical-fitness/history/{employeeId}`
+- `AppointmentController` (`/api/v1/appointments`)
+  - `GET /employee/{employeeId}`
+  - `GET /` (tous)
+  - `GET /history`
+  - `POST /filter`
+  - `GET /{id}`
+  - `POST /Rendez-vous-spontanee`
+  - `POST /{id}/propose-slot`
+  - `POST /{id}/confirm`
+  - `PUT /{id}/status?status=...`
+  - `POST /{id}/cancel`
+  - `POST /{id}/comments`
+  - `DELETE /{id}`
+  - `GET /my-appointments`
+  - `POST /plan-medical-visit`
+  - `DELETE /reset-all` (tests)
+  - `POST /{id}/resend-notifications`
+- `NotificationController` (`/api/v1/notifications`)
+  - `GET /` (page), `GET /unread` (liste), `GET /count`
+  - `PATCH /{id}/read`, `PATCH /read-all`
+  - `DELETE /{id}`, `DELETE /reset-all`
+- `HrController` (`/api/v1/hr`)
+  - `GET /medical-certificates`
+  - `GET /medical-certificates/uploads`
+  - `GET /work-accidents`
+  - `POST /mandatory-visits`
+  - `POST /medical-certificates/upload` (multipart)
+- `NurseCertificatesController` (`/api/v1/nurse`)
+  - `GET /medical-certificates/uploads?employeeId=`
+
+## Données de test (seed)
+Création automatique si la base est vide (`DataInitializer`):
+- `admin@oshapp.com / admin12345678` (ADMIN, activé)
+- `abdelatifgourri11@gmail.com / Abdellatif12345678@` (DOCTOR)
+- `gourriabde@gmail.com / Gourri12345678@` (NURSE)
+- `avdjdcsb@gmail.com / Abcd12345678@` (RH)
+- `salarie@oshapp.com / salarie123` (EMPLOYEE)
+- `hse@oshapp.com / hse12345678` (HSE)
+- `gourri.abdellatif@gmail.com / Abdellatif12345678@` (EMPLOYEE)
+
+Note: seuls les comptes ADMIN sont activés par défaut; les autres nécessitent activation email.
 
 ## 1) Liens de livraison à compléter
 - **Lien GitHub (version fédérée, code source complet)**: (https://github.com/Abdellatif444/OSHapp-Application)
