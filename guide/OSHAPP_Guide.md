@@ -233,17 +233,12 @@ docker save oshapp-frontend:latest -o guide/oshapp-frontend-latest.tar
     ```bash
     docker exec -t oshapp-postgres pg_dump -U postgres -d oshapp | gzip > guide/databases/oshapp_postgres.sql.gz
     ```
-- **MongoDB** (si utilisé)
+- **MongoDB** 
   - Service: `mongodb` (27017)
   - Export:
     ```bash
     docker exec oshapp-mongo mongodump --db oshapp --archive=guide/databases/oshapp_mongo.archive
     ```
-- **MinIO** (stockage objets)
-  - Console: `http://localhost:9001`
-  - Export: via `mc` (MinIO Client) ou téléchargement par la console (à documenter selon bucket utilisé)
-
-Veuillez ajouter ci-dessus les **liens séparés** (drive interne, S3, archive réseau) où sont déposés ces exports.
 
 ## 10) Qualité, sécurité et bonnes pratiques
 - **JWT**: définir `APP_JWT_SECRET` robuste, conserver hors dépôt.
