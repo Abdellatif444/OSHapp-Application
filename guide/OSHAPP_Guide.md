@@ -22,15 +22,6 @@ Version: 2025-10-11
 - **Docs API**: Swagger UI via SpringDoc
   - URL: `http://localhost:8081/swagger-ui/index.html` (après démarrage)
 
-```mermaid
-flowchart LR
-  FE[Flutter Web (Nginx:3000)] -->|API REST| BE(Spring Boot:8081)
-  BE -->|JPA| PG[(PostgreSQL)]
-  BE -->|Driver| MG[(MongoDB)]
-  BE -->|S3 API| MN[(MinIO)]
-  BE -->|OIDC| KC[Keycloak]
-```
-
 ## 3) Prérequis de développement
 - **Java 17** et **Maven >= 3.9**
 - **Flutter stable** avec **Dart >= 3** (web activé)
