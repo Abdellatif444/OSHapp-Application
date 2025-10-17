@@ -45,8 +45,8 @@ La commande précédente va créer toutes les images Docker  automatiquement pou
  ```bash
   flutter logs -d IZ9PKVGQUGWKL5FQ
 ```
-
 ## 4)installer image apk du notre application :
  ```bash
  flutter build apk --debug
 ```
+#output:build\app\outputs\flutter-apk\app-debug.apk
