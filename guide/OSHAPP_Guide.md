@@ -92,7 +92,6 @@ docker compose up -d --build
 - postgresql:`http://localhost:5432/`:fed9fb91e5b0dac4364119f96445a474f8009d6ff6775fd08fcd43fe5a4c5af9
 - MinIO Console: `http://localhost:9001`:6721c52bdd2028279ba904fcd3f03d84f7fa3fa7c0c17c9e17b9d6f8bbecd801
 
-4-comment excecuter les images docker:
 
 
 Note: le service `backend` de dev dans Compose utilise l’image `maven:3.9-eclipse-temurin-17` et lance `spring-boot:run` avec le profil `docker`.
