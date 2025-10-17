@@ -11,6 +11,11 @@ La commande précédente va créer toutes les images Docker  automatiquement pou
 - postgresql:`http://localhost:5432/`:fed9fb91e5b0dac4364119f96445a474f8009d6ff6775fd08fcd43fe5a4c5af9
 - MinIO Console: `http://localhost:9001`:6721c52bdd2028279ba904fcd3f03d84f7fa3fa7c0c17c9e17b9d6f8bbecd801
 
+ # Pour voir les images 
+ ```bash
+  docker images
+```
+
 # Check Docker services
  ```bash
   docker ps
@@ -39,4 +44,9 @@ La commande précédente va créer toutes les images Docker  automatiquement pou
 # Check flutter status
  ```bash
   flutter logs -d IZ9PKVGQUGWKL5FQ
+```
+
+## 4)installer image apk du notre application :
+ ```bash
+ flutter build apk --debug
 ```
